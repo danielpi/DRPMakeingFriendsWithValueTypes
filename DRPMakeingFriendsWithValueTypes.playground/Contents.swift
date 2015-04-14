@@ -11,7 +11,8 @@ struct Drawing {
     mutating func appendTouchSample(sample: TouchSample) {
         if let lastAction = actions.last {
             var action = lastAction
-            action.appendTouchSample(sample)
+            //action.appendTouchSample(sample)
+            action.samples += [sample]
             
             actions.removeLast()
             actions = actions + [action]
@@ -31,9 +32,11 @@ struct DrawingAction {
         case Eraser(width: CGFloat)
     }
     
+    /*
     mutating func appendTouchSample(sample: TouchSample) {
         samples = samples + [sample]
     }
+    */
 }
 
 struct TouchSample {
@@ -93,8 +96,6 @@ extension TouchSample {
             velocities.append(TouchSample.estimateVelocity(samples[0], samples[1]))
         default:
             velocities.append(TouchSample.estimateVelocity(samples[0], samples[1]))
-            //let index = 1
-            //velocities.append(estimateVelocity(samples[index - 1], samples[index], samples[index + 1]))
             for (ind, value) in enumerate(samples[1..<(samples.count - 1)]) {
                 let index = ind + 1
                 velocities.append(TouchSample.estimateVelocity(samples[index - 1], samples[index], samples[index + 1]))
@@ -105,14 +106,14 @@ extension TouchSample {
         return velocities
     }
     
-    static func estimateVelocity(_ a: TouchSample, _ b: TouchSample) -> CGPoint {
+    static func estimateVelocity(a: TouchSample, _ b: TouchSample) -> CGPoint {
         let deltaX: Double = Double(b.location.x - a.location.x)
         let deltaY: Double = Double(b.location.y - a.location.y)
         let deltaTime: Double = b.timestamp - a.timestamp
         return CGPoint(x: deltaX / deltaTime, y: deltaY / deltaTime)
     }
     
-    static func estimateVelocity(_ a: TouchSample, _ b: TouchSample, _ c: TouchSample) -> CGPoint {
+    static func estimateVelocity(a: TouchSample, _ b: TouchSample, _ c: TouchSample) -> CGPoint {
         let initialVel = estimateVelocity(a, b)
         let finalVel = estimateVelocity(b, c)
         return CGPoint(x:(initialVel.x + finalVel.x) / 2, y: (initialVel.y + finalVel.y) / 2)
@@ -120,7 +121,24 @@ extension TouchSample {
 
 }
 
-
+struct PencilBrush {
+    var lineWidth: CGFloat = 2.0
+    var lineColor: UIColor = UIColor.blackColor()
+    
+    func pathForDrawingAction(action: DrawingAction) -> UIBezierPath {
+        var path = UIBezierPath()
+        path.lineWidth = lineWidth
+        
+        // Linear interpolation
+        path.moveToPoint(action.samples[0].location)
+        for sample in action.samples {
+            // This adds a line from the start point to itself.
+            path.addLineToPoint(sample.location)
+        }
+        
+        return path
+    }
+}
 
 
 
@@ -131,18 +149,18 @@ let canvasController = CanvasController()
 let now = NSDate(timeIntervalSinceNow: 0)
 let timestamp = now.timeIntervalSince1970
 let a = TouchSample(x: 0.0, y: 0.0, timestamp:timestamp)
-let b = TouchSample(x: 0.1, y: 0.0, timestamp:timestamp + 0.1)
-let c = TouchSample(x: 0.2, y: 0.0, timestamp:timestamp + 0.2)
-let d = TouchSample(x: 0.3, y: 0.1, timestamp:timestamp + 0.3)
-let e = TouchSample(x: 0.3, y: 0.1, timestamp:timestamp + 0.4)
+let b = TouchSample(x: 10, y: 10, timestamp:timestamp + 0.1)
+let c = TouchSample(x: 20, y: -20, timestamp:timestamp + 0.2)
+let d = TouchSample(x: 30, y: 30, timestamp:timestamp + 0.3)
+let e = TouchSample(x: 40, y: -40, timestamp:timestamp + 0.4)
 
 var drawingAction = DrawingAction(samples: [a,b,c,d,e], tool: DrawingAction.Tool.Pencil(color: UIColor.lightGrayColor()))
 let drawingActionInitial = drawingAction
 canvasController.currentDrawing.actions += [drawingAction]
 
 
-let f = TouchSample(x: 0.3, y: 0.2, timestamp:timestamp + 0.5)
-drawingAction.appendTouchSample(f)
+let f = TouchSample(x: 50, y: 50, timestamp:timestamp + 0.5)
+drawingAction.samples += [f]
 
 drawingActionInitial.samples.count
 drawingAction.samples.count
@@ -151,6 +169,12 @@ canvasController.currentDrawing.appendTouchSample(f)
 
 
 let velocities = TouchSample.estimateVelocities(drawingAction.samples)
+
+
+var pencil = PencilBrush()
+pencil.lineWidth = 1.0
+pencil.pathForDrawingAction(drawingAction)
+
 
 
 //canvasController.currentDrawing = drawingAction

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>F33B6C77-9A01-4C36-A0DC-A14594313CDD</string>
+	<key>IDESourceControlProjectName</key>
+	<string>DRPMakeingFriendsWithValueTypes</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>4FFA2C777D71B91BD1AB74DFCE0EFA0CC1D3CAB8</key>
+		<string>https://github.com/danielpi/DRPMakeingFriendsWithValueTypes.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>DRPMakeingFriendsWithValueTypes.playground</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>4FFA2C777D71B91BD1AB74DFCE0EFA0CC1D3CAB8</key>
+		<string>..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/danielpi/DRPMakeingFriendsWithValueTypes.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>4FFA2C777D71B91BD1AB74DFCE0EFA0CC1D3CAB8</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>4FFA2C777D71B91BD1AB74DFCE0EFA0CC1D3CAB8</string>
+			<key>IDESourceControlWCCName</key>
+			<string>DRPMakingFriendsWithValueTypes</string>
+		</dict>
+	</array>
+</dict>
+</plist>
