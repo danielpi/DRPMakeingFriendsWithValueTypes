@@ -1,8 +1,19 @@
-//: Playground - noun: a place where people can play
-
 import UIKit
 
-var str = "Hello, playground"
+// This playground is my attempt to flesh out some example code from Andy Matuschak's talk titled "Controlling Complexity in Swift — or — Making Friends with Value Types". It can be found over here https://realm.io/news/andy-matuschak-controlling-complexity/ and I highly recommend watching it.
+
+// Whilst watching the talk I had difficulty wrapping my head around the concepts and seeing how they should be applied. So as a first step towards understanding I have tried to flesh out the example code that is used in the talk.
+
+// One of the key points in the talk is the three I's of value types. 
+
+// Value types are Inert.
+// It’s pretty hard to make a value type that behaves, especially over time. It’s typically inert, a hunk of data like the spreadsheet, storing data and exposing methods that perform computations on that data. What tha tmeans is that the control flow is strictly controlled by the one owener of that value type. That makes it vastly easier to reason about code that will only be invoked by one caller.
+
+// Value types are Isolated.
+// Reference types create implicit dependencies, or dependencies in the application structure that can’t be seen.
+
+// Value types are Interchangable.
+//  Every time you assign a value to a new variable, that value is copied, and so all of those copies are completely interchangeable. If they have the same data in them, you cannot tell the difference between them. This means that you can safely store a value that’s been passed to you. Interchangeability means that it doesn’t matter how a value was constructed, as long as it compares equal via equals equals.
 
 
 struct Drawing {
@@ -11,7 +22,6 @@ struct Drawing {
     mutating func appendTouchSample(sample: TouchSample) {
         if let lastAction = actions.last {
             var action = lastAction
-            //action.appendTouchSample(sample)
             action.samples += [sample]
             
             actions.removeLast()
@@ -31,12 +41,6 @@ struct DrawingAction {
         case Pencil(color: UIColor)
         case Eraser(width: CGFloat)
     }
-    
-    /*
-    mutating func appendTouchSample(sample: TouchSample) {
-        samples = samples + [sample]
-    }
-    */
 }
 
 struct TouchSample {
@@ -141,11 +145,11 @@ struct PencilBrush {
 }
 
 
-
+// This is the identity for our state
 let canvasController = CanvasController()
 
 
-
+// We can create a stream of data
 let now = NSDate(timeIntervalSinceNow: 0)
 let timestamp = now.timeIntervalSince1970
 let a = TouchSample(x: 0.0, y: 0.0, timestamp:timestamp)
@@ -155,50 +159,54 @@ let d = TouchSample(x: 30, y: 30, timestamp:timestamp + 0.3)
 let e = TouchSample(x: 40, y: -40, timestamp:timestamp + 0.4)
 
 var drawingAction = DrawingAction(samples: [a,b,c,d,e], tool: DrawingAction.Tool.Pencil(color: UIColor.lightGrayColor()))
-let drawingActionInitial = drawingAction
+
+
+// Adding our stream of data to our state identity gives it a snapshot of our data.
 canvasController.currentDrawing.actions += [drawingAction]
 
 
+// We can then modify our data without the snapshot being affected
 let f = TouchSample(x: 50, y: 50, timestamp:timestamp + 0.5)
 drawingAction.samples += [f]
 
-drawingActionInitial.samples.count
+canvasController.currentDrawing.actions[0].samples.count
 drawingAction.samples.count
 
-canvasController.currentDrawing.appendTouchSample(f)
 
-
+// The stream of data can be passed around and used elsewhere without any risk of it being changed.
 let velocities = TouchSample.estimateVelocities(drawingAction.samples)
 
 
 var pencil = PencilBrush()
 pencil.lineWidth = 1.0
-pencil.pathForDrawingAction(drawingAction)
+pencil.pathForDrawingAction(canvasController.currentDrawing.actions[0])
+
+// We can incorporate state and side effects by invoking methods on our identity.
+canvasController.currentDrawing.appendTouchSample(f)
+let g = TouchSample(x: 60, y: 0, timestamp:timestamp + 0.6)
+canvasController.currentDrawing.appendTouchSample(g)
+
+var pencil2 = pencil
+pencil2.lineWidth = 2.0
+pencil2.pathForDrawingAction(canvasController.currentDrawing.actions[0])
 
 
 
-//canvasController.currentDrawing = drawingAction
+
+
 
 /*
-// estimate touch velocity
-extension TouchSample {
-    static func estimateVelocities(samples: [TouchSample])
-        -> [CGPoint]
-}
+Yet to do
 
 // smooth touch sample curves
 extension TouchSample {
     static func smoothTouchSamples(samples: [TouchSample]) -> [TouchSample]
 }
 
-// compute stroke geometry
-struct PencilBrush {
-    func pathForDrawingAction(action: DrawingAction)
-        -> UIBezierPath
-}
+At what point do you create a new drawingAction? Needs to happen when a new touch gesture is started which is identified via data in UITouch. I see a couple of options
+- When a UITouch with a phase of Began comes in you create a new drawing action in handleTouch in the canvasController (class, identity). This is what is done above.
+- Push the step down a layer by creating a createNewDrawingAction function in the Drawing struct. (still activated in the layer above when the UITouch is identified)
+- Add a phase property to TouchSample so that this can then be detected in DrawingAction?
 
-// incorporate touch into drawing (+ update state)
-extension Drawing {
-    mutating func appendTouchSample(sample: TouchSample)
-}
+Where should the current Tool be stored? We need to be able to select which tool is used for each drawing action. I'm assuming this will happen on creation of the DrawingAction primarily. Should there be a currentTool in the canvasController?
 */
